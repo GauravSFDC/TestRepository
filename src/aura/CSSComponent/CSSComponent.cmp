@@ -1,0 +1,149 @@
+<aura:component controller="PP_MyPayStatementCntrl">
+    <ltng:require styles="{!$Resource.slds201+ '/assets/styles/salesforce-lightning-design-system.min.css'}" />
+    <ltng:require styles="{!$Resource.slds201+ '/assets/styles/salesforce-lightning-design-system.css'}" />
+    <ltng:require styles="{!$Resource.PP_fixedCSS}" />
+    <ltng:require styles="{!$Resource.PP_MyPaySlidder}" />
+    <ltng:require scripts="{!$Resource.PP_JqueryLib}"  />
+    <ltng:require scripts="{!$Resource.PP_JquerySlidder}"  afterScriptsLoaded="{!c.afterScriptsLoaded}"/>
+    <aura:attribute name="currentYear" 			type="Integer" />
+    <aura:attribute name="LastYear" 			type="String"/>
+    <aura:attribute name="LastYearSecond" 		type="String"/>
+    <aura:attribute name="selectedYear" 		type="String" />
+    <aura:attribute name="currentSelectedYear" 	type="Boolean" default="false" />
+    <aura:attribute name="lastSelectYear" 		type="Boolean"/>
+    <aura:attribute name="lastSecondSelectedYear" type="Boolean"/>
+    <aura:attribute name="showError" 			type="Boolean" default="false"/>
+    <aura:attribute name="fieldNames" 			type="String[]" />
+    <aura:attribute name="hideDetails" 			type="Boolean" />
+    <aura:attribute name="isCallFunction" 		type="Boolean" default="true"/>
+    <aura:handler action="{!c.loadYear}" 		name="init" value="{!this}"/>
+    <aura:handler event="aura:waiting" 			action="{!c.showSpinner}"/>
+    <aura:handler event="aura:doneWaiting" 		action="{!c.hideSpinner}"/>  
+    <aura:handler event="c:PP_MyPayStatementMasterMethodEvent" 	action="{!c.gotEvent}" />
+    <aura:handler event="c:PP_MyPayStatementErrorMessage" 		action="{!c.showError}" />
+    <aura:handler event="c:PP_MyPayStatementSummaryEvent" 		action="{!c.gotSummaryEvent}" />
+
+    <html data-enhance="false">
+        <head>
+            <title>Pay Earnings</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        </head>
+        <body>
+            <div id="abi-portal" class="pay-earnings-page" >
+                    <aura:renderIf isTrue="{!v.hideDetails}"> 
+                        <section class="abi-sub-header abi-page-margins">
+                            <a href=""><img class="abi-left-arrow abi-page-logo" src="/resource/PP_MyPayStatementLeftRedIcon" alt="Back Arrow"/></a>
+                            <a href=""><img class="abi-wallet abi-page-logo" src="/resource/PP_MyPayStatementWalletIcon" alt="Wallet Icon"/></a>
+                            <h1 class="pay-earning-header">PAY EARNINGS</h1>
+                        </section>
+                        <nav class="abi-year-selector abi-page-margins">
+                            <div id="shy-year-slider">
+                                <div class="year-holder">
+                                    <span class="shySliderButton prevButton">&lt;</span>
+                                    <span class="shySliderButton nextButton">&gt;</span>
+                                    <div class="year-overflow">
+                                        <ul class="year-list">
+                                            <aura:iteration items="{!v.currentYear}" var="years" >
+                                                <li class='year-list-item' data-name='{!years}' onclick='{!c.currentYear}' >
+                                                    <a href='' alt=''>
+                                                        {!years}
+                                                    </a>
+                                                </li>
+                                            </aura:iteration>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                    </aura:renderIf>
+                    <div class="main-container abi-page-margins">
+                        <div class="slds">
+                            <center>
+                                <div class="demo-only" style="height:6.25rem;" aura:id="spinner">
+                                    <div class="demo-only" style="height:3.75rem;">
+                                        <div class="slds-spinner_container">
+                                            <div class="slds-spinner--brand slds-spinner slds-spinner--small" aria-hidden="false" role="alert">
+                                                <div class="slds-spinner__dot-a"></div>
+                                                <div class="slds-spinner__dot-b"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </center> 
+                        </div>
+                        <aura:If isTrue="{!v.isCallFunction}">
+                            <c:PP_MyPayStatementListComponent selectedYear="{!v.selectedYear}" /> 
+                        </aura:If>
+                         <!--<c:PP_MyPayStatementListComponent selectedYear="{!v.selectedYear}" /> -->
+                      <!--  <div class="monthly-earning-container">
+                            <h2>JUNE</h2>
+                            <a href="#" class="earning-display-link">
+                                <div class="earning-display">
+                                    <div class="abi-one-half pay-date-container">
+                                        <div class="abi-label">Pay Date</div>
+                                        <div class="pay-date-display">06/15/2016</div>
+                                    </div>
+                                    <div class="abi-one-half pay-amount-container">
+                                        <div class="abi-label">Net Pay</div>
+                                        <div class="net-pay-display">$6,000.00</div>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#" class="earning-display-link">
+                                <div class="earning-display">
+                                    <div class="abi-one-half pay-date-container">
+                                        <div class="abi-label">Pay Date</div>
+                                        <div class="pay-date-display">06/01/2016</div>
+                                    </div>
+                                    <div class="abi-one-half pay-amount-container">
+                                        <div class="abi-label">Net Pay</div>
+                                        <div class="net-pay-display">$5,975.87</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>	
+                        <div class="monthly-earning-container">
+                            <h2>MAY</h2>
+                            <a href="#" class="earning-display-link">
+                                <div class="earning-display">
+                                    <div class="abi-one-half pay-date-container">
+                                        <div class="abi-label">Pay Date</div>
+                                        <div class="pay-date-display">05/15/2016</div>
+                                    </div>
+                                    <div class="abi-one-half pay-amount-container">
+                                        <div class="abi-label">Net Pay</div>
+                                        <div class="net-pay-display">$6,000.00</div>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#" class="earning-display-link">
+                                <div class="earning-display">
+                                    <div class="abi-one-half pay-date-container">
+                                        <div class="abi-label">Pay Date</div>
+                                        <div class="pay-date-display">05/01/2016</div>
+                                    </div>
+                                    <div class="abi-one-half pay-amount-container">
+                                        <div class="abi-label">Net Pay</div>
+                                        <div class="net-pay-display">$5,765.00</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div> -->
+                        <aura:if isTrue="{!v.showError}">
+                            <tr class="errorMsg"  >
+                                <td style="vertical-align: middle;width:69px;height:69px;padding-left:9px;" >
+                                    <img src="/resource/PP_MyPayStatementErrorIcon1px"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                </td>
+                                <td style="width:5px;vertical-align:middle;">
+                                    &nbsp;
+                                </td>
+                                <td style="float:left;width:90%;padding-top: 35px;vertical-align:middle;" >
+                                    Pay Statement Not Generated for This Year 
+                                </td>
+                            </tr>
+                        </aura:if>
+                    </div> 
+                </div>
+        </body>
+    </html>
+</aura:component>
